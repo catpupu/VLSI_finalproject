@@ -27,11 +27,24 @@ public:
         else return false ;
     }
 
-    int find_instance( string name ) {
+    int find_vertex( string name ) {
         for ( int i = 0 ; i < vertices.size() ; i++ ) 
             if ( name == vertices[i].instance_name ) return i ;
         
         return -1 ; // not found
+    }
+
+    void print_all() {
+        for ( int i = 0 ; i < vertices.size() ; i++ ) {
+            cout << "INSTANCE" << vertices[i].instance_name << endl ;
+
+            for ( int j = 0 ; j < vertices[i].out.size() ; j++ ) {
+                cout << "\t" << vertices[i].out[j].net_name << " : " ;
+                cout << vertices[i].out[j].weight << ", " << vertices[i].out[j].direction ;
+            }
+
+            cout << endl ;
+        }
     }
 
     void append_vertex( string vertex_name ) {
@@ -40,8 +53,28 @@ public:
         vertices.push_back( push_in ) ;
     }
 
+    // find edge and update direction data( adjacent list )
+    void update_direction( string name ) {
+        for ( int i = 0 ; i < vertices.size() ; i++ ) {
+            for ( int j = 0 ; j < vertices[i].out.size() ; j++ ) {
+                // find where the net start
+                if ( name == vertices[i].out[j].net_name )
+                    // and the direction is last vertex( current process instance )
+                    vertices[i].out[j].direction = vertices[vertices.size() - 1].instance_name ;
+            }
+        }
+    }
+
     void update_AdjacentList( string edge_name, int edge_weight, bool out ) {
-        // same net : out first(out->in) is fine, but in first can't find where the net from
+        // bug : ( the same net ) out first(out->in) is fine, but in first can't find where the net from
+        if ( out ) {
+            adjacent push_in ;
+            push_in.net_name = edge_name ;
+            push_in.weight = edge_weight ;
+            vertices[vertices.size() - 1].out.push_back( push_in ) ;
+        }
+
+        else update_direction( edge_name ) ;
     }
 } ;
 
@@ -69,14 +102,32 @@ int main() {
         
         else {
             if ( circuit_graph.is_empty() ) read_file( circuit_graph ) ;
+
+            switch ( mode ) {
+                case 1 :
+                    // dfs
+                    break ;
+
+                case 2 :
+                    // dijkstra
+                    break ;
+
+                default :
+                    cout << "other mode" << endl ;
+                    break ;
+            }
         }
     }
 }
 
 void read_file( Graph & circuit_graph ) {
     ifstream ifs ;
-    stringstream ss ;
-    string line, instance_name, net ;
+    stringstream ss, stoi ;
+
+    string line ; // for getline
+    string instance_name ; // for instance format
+    string net, net_name, net_weight_str ; // for net format
+    int net_weight_int ;
 
     ifs.open("input.txt") ;
     if ( !ifs.is_open() ) {
@@ -115,14 +166,26 @@ void read_file( Graph & circuit_graph ) {
             ss << line ;
 
             while( ss >> net ) {
-                // split
+                // split  ex:N9(2,i)
                 size_t delimiter_up = net.find("(") ;
                 size_t delimiter_comma = net.find(",") ;
+                net_name = net.substr( 0, delimiter_up ) ;
+                net_weight_str = net.substr( delimiter_up + 1, delimiter_comma - delimiter_up - 1 ) ;
 
-                circuit_graph.update_AdjacentList(  ) ;
+                // convert string to int
+                // because g++ 4.8.5 20150623 can't use std::stoi(), at least c++11
+                stoi.clear() ;
+                stoi << net_weight_str ;
+                stoi >> net_weight_int ;
 
                 // store net
+                if ( net[delimiter_comma + 1] == 'i' )
+                    circuit_graph.update_AdjacentList( net_name, net_weight_int, false ) ;
+                else 
+                    circuit_graph.update_AdjacentList( net_name, net_weight_int, true ) ;
             }
         }
+
+        circuit_graph.print_all() ;
     }
 }
