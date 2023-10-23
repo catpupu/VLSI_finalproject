@@ -6,6 +6,8 @@
 
 using namespace std ;
 
+// =============== data structure ==================
+
 struct adjacent {
     string net_name ;
     string direction ;
@@ -78,11 +80,13 @@ public:
     }
 } ;
 
-
+// ==================== head =======================
 
 void read_file( Graph & circuit_graph ) ;
+void DFS( Graph circuit_graph ) ;
+void Dijkstra( Graph circuit_graph ) ;
 
-
+// ================== function =====================
 
 int main() {
     int mode = -1 ;
@@ -189,4 +193,12 @@ void read_file( Graph & circuit_graph ) {
         ifs.close() ;
         // circuit_graph.print_all() ;
     }
+}
+
+void DFS( Graph circuit_graph ) {
+    // resursion?
+}
+
+void Dijkstra( Graph circuit_graph ) {
+    // build list
 }
