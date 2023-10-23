@@ -8,6 +8,7 @@ using namespace std ;
 
 struct adjacent {
     string net_name ;
+    string direction ;
     int weight ;
 } ;
 
@@ -18,25 +19,29 @@ struct Instance {
 
 class Graph {
 private:
-    vector <Instance> edges ;
+    vector <Instance> vertices ;
 
 public:
     bool is_empty() {
-        if ( edges.empty() ) return true ;
+        if ( vertices.empty() ) return true ;
         else return false ;
     }
 
     int find_instance( string name ) {
-        for ( int i = 0 ; i < edges.size() ; i++ ) 
-            if ( name == edges[i].instance_name ) return i ;
+        for ( int i = 0 ; i < vertices.size() ; i++ ) 
+            if ( name == vertices[i].instance_name ) return i ;
         
         return -1 ; // not found
     }
 
-    void append_edge( string edge_name ) {
+    void append_vertex( string vertex_name ) {
         Instance push_in ;
-        push_in.instance_name = edge_name ;
-        edges.push_back( push_in ) ;
+        push_in.instance_name = vertex_name ;
+        vertices.push_back( push_in ) ;
+    }
+
+    void update_AdjacentList( string edge_name, int edge_weight, bool out ) {
+        // same net : out first(out->in) is fine, but in first can't find where the net from
     }
 } ;
 
@@ -94,7 +99,7 @@ void read_file( Graph & circuit_graph ) {
             ss << line ;
             if (  ss.str().size() > 1 ) {
                 ss >> instance_name >> instance_name ;
-                circuit_graph.append_edge( instance_name ) ;
+                circuit_graph.append_vertex( instance_name ) ;
             }
 
             else {
@@ -110,7 +115,12 @@ void read_file( Graph & circuit_graph ) {
             ss << line ;
 
             while( ss >> net ) {
-                // split (,)
+                // split
+                size_t delimiter_up = net.find("(") ;
+                size_t delimiter_comma = net.find(",") ;
+
+                circuit_graph.update_AdjacentList(  ) ;
+
                 // store net
             }
         }
