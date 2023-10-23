@@ -36,7 +36,7 @@ public:
 
     void print_all() {
         for ( int i = 0 ; i < vertices.size() ; i++ ) {
-            cout << "INSTANCE" << vertices[i].instance_name << endl ;
+            cout << "INSTANCE " << vertices[i].instance_name << endl ;
 
             for ( int j = 0 ; j < vertices[i].out.size() ; j++ ) {
                 cout << "\t" << vertices[i].out[j].net_name << " : " ;
@@ -140,7 +140,7 @@ void read_file( Graph & circuit_graph ) {
 
         // two lines in a group until "endcircuit"
         while( getline( ifs, line ) ) {
-            if ( line == "ENDCIRCUIT" ) break ;
+            if ( line.find("ENDCIRCUIT") != string::npos ) break ;
 
             // ss already output all char no needs to ss.str("")
             // ""EOF ---(clear)---> ""(reset success)
@@ -186,6 +186,7 @@ void read_file( Graph & circuit_graph ) {
             }
         }
 
-        circuit_graph.print_all() ;
+        ifs.close() ;
+        // circuit_graph.print_all() ;
     }
 }
