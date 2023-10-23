@@ -35,13 +35,11 @@ class Graph {
 ```
 
 ### 功能
-:::info
 1. 以DFS遍歷所有Cell
 2. 使用Dijkstra演算法求得所有Cell之最短路徑(起點為S)
-:::
+
 
 ### 環境
-:::warning
 於Window開發，運行於Linux( *g++ 4.8.5 20150623* )
 編譯前記得以 dos2unix 指令轉檔
-:::
+
