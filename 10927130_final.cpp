@@ -99,21 +99,34 @@ private :
     int time = 0, graph_size = 0 ; // dfs time line
     stack <int> go_to ; // go-to list
     DFS_Vertex * DFS_VertexArr ; // vertex data for DFS, arrange by vector index
+    
+    void DFS_Visit( int visit_idx ) {
+        DFS_VertexArr[visit_idx].color = "gray" ;
+        DFS_VertexArr[visit_idx].discover_time = ++time ;
+
+        // see adj list
+        
+
+        DFS_VertexArr[visit_idx].color = "black" ;
+        DFS_VertexArr[visit_idx].finish_time = ++time ;
+    }
+
 
 public :
     DFS ( Graph circuit_graph ) {
+        // initial
         graph = circuit_graph ;
         graph_size = graph.size_of() ;
         DFS_VertexArr = new DFS_Vertex[ graph_size ] ;
 
-        // visit
-
+        // call resursion to traverse vertices
+        for ( int i = 0 ; i < graph_size ; i++ ) {
+            if ( DFS_VertexArr[i].color == "white" ) {
+                DFS_Visit( i ) ;
+            }
+        }
 
         delete[] DFS_VertexArr ;
-    }
-
-    void DFS_Visit() {
-        
     }
 } ;
 
