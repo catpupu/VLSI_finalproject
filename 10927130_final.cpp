@@ -3,6 +3,8 @@
 # include <sstream>
 # include <vector>
 # include <string>
+# include <algorithm>
+# include <stack>
 
 using namespace std ;
 
@@ -19,6 +21,13 @@ struct Instance {
     vector <adjacent> out ;
 } ;
 
+struct DFS_Vertex {
+    string color = "white" ;
+    int discover_time = -1 ;
+    int finish_time = -1 ;
+    int predecessor = -1 ;
+} ;
+
 class Graph {
 private:
     vector <Instance> vertices ;
@@ -27,6 +36,10 @@ public:
     bool is_empty() {
         if ( vertices.empty() ) return true ;
         else return false ;
+    }
+
+    int size_of() {
+        return vertices.size() ;
     }
 
     int find_vertex( string name ) {
@@ -80,10 +93,33 @@ public:
     }
 } ;
 
+class DFS {
+private :
+    Graph graph ;
+    int time = 0, graph_size = 0 ; // dfs time line
+    stack <int> go_to ; // go-to list
+    DFS_Vertex * DFS_VertexArr ; // vertex data for DFS, arrange by vector index
+
+public :
+    DFS ( Graph circuit_graph ) {
+        graph = circuit_graph ;
+        graph_size = graph.size_of() ;
+        DFS_VertexArr = new DFS_Vertex[ graph_size ] ;
+
+        // visit
+
+
+        delete[] DFS_VertexArr ;
+    }
+
+    void DFS_Visit() {
+        
+    }
+} ;
+
 // ==================== head =======================
 
 void read_file( Graph & circuit_graph ) ;
-void DFS( Graph circuit_graph ) ;
 void Dijkstra( Graph circuit_graph ) ;
 
 // ================== function =====================
@@ -193,10 +229,6 @@ void read_file( Graph & circuit_graph ) {
         ifs.close() ;
         // circuit_graph.print_all() ;
     }
-}
-
-void DFS( Graph circuit_graph ) {
-    // resursion?
 }
 
 void Dijkstra( Graph circuit_graph ) {
