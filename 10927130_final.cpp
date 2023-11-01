@@ -22,10 +22,10 @@ struct Instance {
 } ;
 
 struct DFS_Vertex {
-    string color = "white" ;
-    int discover_time = -1 ;
-    int finish_time = -1 ;
-    int predecessor = -1 ;
+    string color ;
+    int discover_time ;
+    int finish_time ;
+    int predecessor ;
 } ;
 
 class Graph {
@@ -105,12 +105,25 @@ public:
 
         else update_direction( edge_name ) ;
     }
+
+    // n^3 hahaha (12*2*2)
+    void sort_adjacent() {
+        for ( int i = 0 ; i < vertices.size() ; i++ ) {
+            for ( int j = 0 ; j < vertices[i].out.size() ; j++ ) {
+                for ( int k = j + 1 ; k < vertices[i].out.size() ; k++ ) {
+                    if ( vertices[i].out[j].direction > vertices[i].out[k].direction ) {
+                        swap( vertices[i].out[j], vertices[i].out[k] ) ;
+                    }
+                }
+            }
+        }
+    }
 } ;
 
 class DFS {
 private :
     Graph graph ;
-    int time = 0, graph_size = 0 ; // dfs time line
+    int time, graph_size ; // dfs time line
     DFS_Vertex * DFS_VertexArr ; // vertex data for DFS, arrange by vector index
     queue <int> DFS_Seq ;
     
@@ -130,8 +143,11 @@ private :
         while( !go_to.empty() ) {
             curr_go_to = go_to.front() ;
             go_to.pop() ;
-            DFS_VertexArr[curr_go_to].predecessor = visit_idx ;
-            DFS_Visit( curr_go_to ) ;
+
+            if ( DFS_VertexArr[curr_go_to].color == "white" ) {
+                DFS_VertexArr[curr_go_to].predecessor = visit_idx ;
+                DFS_Visit( curr_go_to ) ;
+            }
         }
 
         // finish this vertex
@@ -144,7 +160,7 @@ private :
 
         while ( !DFS_Seq.empty() ) {
             if ( end ) 
-                cout << graph.find_vertex( DFS_Seq.front() ) << endl ;
+                cout << graph.find_vertex( DFS_Seq.front() ) << endl << endl << endl ;
                 
             else {
                 cout << graph.find_vertex( DFS_Seq.front() ) << " >> " ;
@@ -157,19 +173,25 @@ private :
 
 
 public :
-    DFS ( Graph circuit_graph ) {
+    void do_DFS ( Graph circuit_graph ) {
         // initial
+        time = 0 ;
         graph = circuit_graph ;
         graph_size = graph.size_of() ;
         DFS_VertexArr = new DFS_Vertex[ graph_size ] ;
 
-        // call resursion to traverse vertices
+        for ( int i = 0 ; i < graph_size ; i++ ) 
+            DFS_VertexArr[i].color = "white" ;
+
+
+        // call resursion to traverse verticescd
         for ( int i = 0 ; i < graph_size ; i++ ) {
             if ( DFS_VertexArr[i].color == "white" ) {
                 DFS_Visit( i ) ;
             }
         }
 
+        Print_DFS_Seq() ;
         delete[] DFS_VertexArr ;
     }
 } ;
@@ -184,6 +206,7 @@ void Dijkstra( Graph circuit_graph ) ;
 int main() {
     int mode = -1 ;
     Graph circuit_graph ;
+    DFS dfs ;
 
     while( 1 ) {
         cout << "***     VLSI Final Project     **\n" ;
@@ -202,7 +225,7 @@ int main() {
 
             switch ( mode ) {
                 case 1 :
-                    // dfs
+                    dfs.do_DFS( circuit_graph ) ;
                     break ;
 
                 case 2 :
@@ -284,7 +307,9 @@ void read_file( Graph & circuit_graph ) {
         }
 
         ifs.close() ;
-        // circuit_graph.print_all() ;
+
+        // resort adjacent list by vertex name order ( Originally base on input file order )
+        circuit_graph.sort_adjacent() ;
     }
 }
 
