@@ -4,7 +4,7 @@
 # include <vector>
 # include <string>
 # include <algorithm>
-# include <stack>
+# include <queue>
 
 using namespace std ;
 
@@ -91,24 +91,49 @@ public:
 
         else update_direction( edge_name ) ;
     }
+
+    void push_adjacent ( int vertex_idx, queue <int> & adj ) {
+        string dir_vertex_name ;
+
+        for ( int i = 0 ; i < vertices[ vertex_idx ].out.size() ; i++ ) {
+            dir_vertex_name = vertices[ vertex_idx ].out[i].direction ;
+            adj.push( find_vertex( dir_vertex_name ) ) ;
+        }
+    }
 } ;
 
 class DFS {
 private :
     Graph graph ;
     int time = 0, graph_size = 0 ; // dfs time line
-    stack <int> go_to ; // go-to list
     DFS_Vertex * DFS_VertexArr ; // vertex data for DFS, arrange by vector index
     
     void DFS_Visit( int visit_idx ) {
+        queue <int> go_to ;
+        int curr_go_to ;
+
+        // discover this vertex
         DFS_VertexArr[visit_idx].color = "gray" ;
         DFS_VertexArr[visit_idx].discover_time = ++time ;
 
-        // see adj list
-        
+        // get adjacent
+        graph.push_adjacent( visit_idx, go_to ) ;
 
+        // visit all
+        while( !go_to.empty() ) {
+            curr_go_to = go_to.front() ;
+            go_to.pop() ;
+            DFS_VertexArr[curr_go_to].predecessor = visit_idx ;
+            DFS_Visit( curr_go_to ) ;
+        }
+
+        // finish this vertex
         DFS_VertexArr[visit_idx].color = "black" ;
         DFS_VertexArr[visit_idx].finish_time = ++time ;
+    }
+
+    void Print_DFS_Seq() {
+        // by discover time
     }
 
 
