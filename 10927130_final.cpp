@@ -49,6 +49,19 @@ public:
         return -1 ; // not found
     }
 
+    string find_vertex( int index ) {
+        return vertices[index].instance_name ;
+    }
+
+    void push_adjacent ( int vertex_idx, queue <int> & adj ) {
+        string dir_vertex_name ;
+
+        for ( int i = 0 ; i < vertices[ vertex_idx ].out.size() ; i++ ) {
+            dir_vertex_name = vertices[ vertex_idx ].out[i].direction ;
+            adj.push( find_vertex( dir_vertex_name ) ) ;
+        }
+    }
+
     void print_all() {
         for ( int i = 0 ; i < vertices.size() ; i++ ) {
             cout << "INSTANCE " << vertices[i].instance_name << endl ;
@@ -61,6 +74,7 @@ public:
             cout << endl ;
         }
     }
+
 
     void append_vertex( string vertex_name ) {
         Instance push_in ;
@@ -91,15 +105,6 @@ public:
 
         else update_direction( edge_name ) ;
     }
-
-    void push_adjacent ( int vertex_idx, queue <int> & adj ) {
-        string dir_vertex_name ;
-
-        for ( int i = 0 ; i < vertices[ vertex_idx ].out.size() ; i++ ) {
-            dir_vertex_name = vertices[ vertex_idx ].out[i].direction ;
-            adj.push( find_vertex( dir_vertex_name ) ) ;
-        }
-    }
 } ;
 
 class DFS {
@@ -107,6 +112,7 @@ private :
     Graph graph ;
     int time = 0, graph_size = 0 ; // dfs time line
     DFS_Vertex * DFS_VertexArr ; // vertex data for DFS, arrange by vector index
+    queue <int> DFS_Seq ;
     
     void DFS_Visit( int visit_idx ) {
         queue <int> go_to ;
@@ -115,6 +121,7 @@ private :
         // discover this vertex
         DFS_VertexArr[visit_idx].color = "gray" ;
         DFS_VertexArr[visit_idx].discover_time = ++time ;
+        DFS_Seq.push( visit_idx ) ;
 
         // get adjacent
         graph.push_adjacent( visit_idx, go_to ) ;
@@ -133,7 +140,19 @@ private :
     }
 
     void Print_DFS_Seq() {
-        // by discover time
+        bool end = false ;
+
+        while ( !DFS_Seq.empty() ) {
+            if ( end ) 
+                cout << graph.find_vertex( DFS_Seq.front() ) << endl ;
+                
+            else {
+                cout << graph.find_vertex( DFS_Seq.front() ) << " >> " ;
+                if ( DFS_Seq.size() == 2 ) end = true ;
+            }
+            
+            DFS_Seq.pop() ;
+        }
     }
 
 
