@@ -21,185 +21,71 @@ struct Instance {
     vector <adjacent> out ;
 } ;
 
-struct DFS_Vertex {
-    string color ;
-    int discover_time ;
-    int finish_time ;
-    int predecessor ;
-} ;
+// ==================== head =======================
+
+// graph 
 
 class Graph {
 private:
     vector <Instance> vertices ;
+    void print_all() ;
 
 public:
-    bool is_empty() {
-        if ( vertices.empty() ) return true ;
-        else return false ;
-    }
+    // for outside call to get info.
+    bool is_empty() ;
+    int size_of() ;
+    int find_vertex( string name ) ;
+    string find_vertex( int index ) ;
+    void push_adjacent ( int vertex_idx, queue <int> & adj ) ; // get adj. list
 
-    int size_of() {
-        return vertices.size() ;
-    }
-
-    int find_vertex( string name ) {
-        for ( int i = 0 ; i < vertices.size() ; i++ ) 
-            if ( name == vertices[i].instance_name ) return i ;
-        
-        return -1 ; // not found
-    }
-
-    string find_vertex( int index ) {
-        return vertices[index].instance_name ;
-    }
-
-    void push_adjacent ( int vertex_idx, queue <int> & adj ) {
-        string dir_vertex_name ;
-
-        for ( int i = 0 ; i < vertices[ vertex_idx ].out.size() ; i++ ) {
-            dir_vertex_name = vertices[ vertex_idx ].out[i].direction ;
-            adj.push( find_vertex( dir_vertex_name ) ) ;
-        }
-    }
-
-    void print_all() {
-        for ( int i = 0 ; i < vertices.size() ; i++ ) {
-            cout << "INSTANCE " << vertices[i].instance_name << endl ;
-
-            for ( int j = 0 ; j < vertices[i].out.size() ; j++ ) {
-                cout << "\t" << vertices[i].out[j].net_name << " : " ;
-                cout << vertices[i].out[j].weight << ", " << vertices[i].out[j].direction ;
-            }
-
-            cout << endl ;
-        }
-    }
-
-
-    void append_vertex( string vertex_name ) {
-        Instance push_in ;
-        push_in.instance_name = vertex_name ;
-        vertices.push_back( push_in ) ;
-    }
-
-    // find edge and update direction data( adjacent list )
-    void update_direction( string name ) {
-        for ( int i = 0 ; i < vertices.size() ; i++ ) {
-            for ( int j = 0 ; j < vertices[i].out.size() ; j++ ) {
-                // find where the net start
-                if ( name == vertices[i].out[j].net_name )
-                    // and the direction is last vertex( current process instance )
-                    vertices[i].out[j].direction = vertices[vertices.size() - 1].instance_name ;
-            }
-        }
-    }
-
-    void update_AdjacentList( string edge_name, int edge_weight, bool out ) {
-        // bug : ( the same net ) out first(out->in) is fine, but in first can't find where the net from
-        if ( out ) {
-            adjacent push_in ;
-            push_in.net_name = edge_name ;
-            push_in.weight = edge_weight ;
-            vertices[vertices.size() - 1].out.push_back( push_in ) ;
-        }
-
-        else update_direction( edge_name ) ;
-    }
-
-    // n^3 hahaha (12*2*2)
-    void sort_adjacent() {
-        for ( int i = 0 ; i < vertices.size() ; i++ ) {
-            for ( int j = 0 ; j < vertices[i].out.size() ; j++ ) {
-                for ( int k = j + 1 ; k < vertices[i].out.size() ; k++ ) {
-                    if ( vertices[i].out[j].direction > vertices[i].out[k].direction ) {
-                        swap( vertices[i].out[j], vertices[i].out[k] ) ;
-                    }
-                }
-            }
-        }
-    }
+    
+    // for readfile() call add(or resort) new data
+    void append_vertex( string vertex_name ) ;
+    void update_direction( string name ) ; 
+    void update_AdjacentList( string edge_name, int edge_weight, bool out ) ;
+    void sort_adjacent() ;
 } ;
+
+void read_file( Graph & circuit_graph ) ;
+
+
+// graph algorithm
 
 class DFS {
 private :
+    struct DFS_Vertex {
+        string color ;
+        int discover_time ;
+        int finish_time ;
+        int predecessor ;
+    } ;
+
     Graph graph ;
     int time, graph_size ; // dfs time line
     DFS_Vertex * DFS_VertexArr ; // vertex data for DFS, arrange by vector index
     queue <int> DFS_Seq ;
     
-    void DFS_Visit( int visit_idx ) {
-        queue <int> go_to ;
-        int curr_go_to ;
-
-        // discover this vertex
-        DFS_VertexArr[visit_idx].color = "gray" ;
-        DFS_VertexArr[visit_idx].discover_time = ++time ;
-        DFS_Seq.push( visit_idx ) ;
-
-        // get adjacent
-        graph.push_adjacent( visit_idx, go_to ) ;
-
-        // visit all
-        while( !go_to.empty() ) {
-            curr_go_to = go_to.front() ;
-            go_to.pop() ;
-
-            if ( DFS_VertexArr[curr_go_to].color == "white" ) {
-                DFS_VertexArr[curr_go_to].predecessor = visit_idx ;
-                DFS_Visit( curr_go_to ) ;
-            }
-        }
-
-        // finish this vertex
-        DFS_VertexArr[visit_idx].color = "black" ;
-        DFS_VertexArr[visit_idx].finish_time = ++time ;
-    }
-
-    void Print_DFS_Seq() {
-        bool end = false ;
-
-        while ( !DFS_Seq.empty() ) {
-            if ( end ) 
-                cout << graph.find_vertex( DFS_Seq.front() ) << endl << endl << endl ;
-                
-            else {
-                cout << graph.find_vertex( DFS_Seq.front() ) << " >> " ;
-                if ( DFS_Seq.size() == 2 ) end = true ;
-            }
-            
-            DFS_Seq.pop() ;
-        }
-    }
+    void DFS_Visit( int visit_idx ) ; // DFS recursion
+    void Print_DFS_Seq() ;
 
 
 public :
-    void do_DFS ( Graph circuit_graph ) {
-        // initial
-        time = 0 ;
-        graph = circuit_graph ;
-        graph_size = graph.size_of() ;
-        DFS_VertexArr = new DFS_Vertex[ graph_size ] ;
-
-        for ( int i = 0 ; i < graph_size ; i++ ) 
-            DFS_VertexArr[i].color = "white" ;
-
-
-        // call resursion to traverse verticescd
-        for ( int i = 0 ; i < graph_size ; i++ ) {
-            if ( DFS_VertexArr[i].color == "white" ) {
-                DFS_Visit( i ) ;
-            }
-        }
-
-        Print_DFS_Seq() ;
-        delete[] DFS_VertexArr ;
-    }
+    // init data then traverse(DFS) and print sequence
+    void do_DFS ( Graph circuit_graph ) ; 
 } ;
 
-// ==================== head =======================
+class Dijkstra {
+private:
+    struct Dijkstra_Vertex {
+        int distance ;
+        int predecessor ;
+    } ;
 
-void read_file( Graph & circuit_graph ) ;
-void Dijkstra( Graph circuit_graph ) ;
+public:
+    void init ( Graph circuit_graph ) ;
+    int shortest ( int vertex_1, int vertex_2 ) ;
+    void print_allVertex_shortest ( int start ) ;
+} ;
 
 // ================== function =====================
 
@@ -229,7 +115,9 @@ int main() {
                     break ;
 
                 case 2 :
-                    // dijkstra
+                    cout << "Single source shortest path algorithm (Dijkstra)" << endl ;
+
+                    
                     break ;
 
                 default :
@@ -313,6 +201,177 @@ void read_file( Graph & circuit_graph ) {
     }
 }
 
-void Dijkstra( Graph circuit_graph ) {
-    // build list
-}
+class Graph {
+private:
+    vector <Instance> vertices ;
+
+    void print_all() {
+        for ( int i = 0 ; i < vertices.size() ; i++ ) {
+            cout << "INSTANCE " << vertices[i].instance_name << endl ;
+
+            for ( int j = 0 ; j < vertices[i].out.size() ; j++ ) {
+                cout << "\t" << vertices[i].out[j].net_name << " : " ;
+                cout << vertices[i].out[j].weight << ", " << vertices[i].out[j].direction ;
+            }
+
+            cout << endl ;
+        }
+    }
+
+public:
+    bool is_empty() {
+        if ( vertices.empty() ) return true ;
+        else return false ;
+    }
+
+    int size_of() {
+        return vertices.size() ;
+    }
+
+    int find_vertex( string name ) {
+        for ( int i = 0 ; i < vertices.size() ; i++ ) 
+            if ( name == vertices[i].instance_name ) return i ;
+        
+        return -1 ; // not found
+    }
+
+    string find_vertex( int index ) {
+        return vertices[index].instance_name ;
+    }
+
+    void push_adjacent ( int vertex_idx, queue <int> & adj ) {
+        string dir_vertex_name ;
+
+        for ( int i = 0 ; i < vertices[ vertex_idx ].out.size() ; i++ ) {
+            dir_vertex_name = vertices[ vertex_idx ].out[i].direction ;
+            adj.push( find_vertex( dir_vertex_name ) ) ;
+        }
+    }
+
+
+    void append_vertex( string vertex_name ) {
+        Instance push_in ;
+        push_in.instance_name = vertex_name ;
+        vertices.push_back( push_in ) ;
+    }
+
+    // find edge and update direction data( adjacent list )
+    void update_direction( string name ) {
+        for ( int i = 0 ; i < vertices.size() ; i++ ) {
+            for ( int j = 0 ; j < vertices[i].out.size() ; j++ ) {
+                // find where the net start
+                if ( name == vertices[i].out[j].net_name )
+                    // and the direction is last vertex( current process instance )
+                    vertices[i].out[j].direction = vertices[vertices.size() - 1].instance_name ;
+            }
+        }
+    }
+
+    void update_AdjacentList( string edge_name, int edge_weight, bool out ) {
+        // bug : ( the same net ) out first(out->in) is fine, but in first can't find where the net from
+        if ( out ) {
+            adjacent push_in ;
+            push_in.net_name = edge_name ;
+            push_in.weight = edge_weight ;
+            vertices[vertices.size() - 1].out.push_back( push_in ) ;
+        }
+
+        else update_direction( edge_name ) ;
+    }
+
+    // n^3 hahaha (12*2*2)
+    void sort_adjacent() {
+        for ( int i = 0 ; i < vertices.size() ; i++ ) {
+            for ( int j = 0 ; j < vertices[i].out.size() ; j++ ) {
+                for ( int k = j + 1 ; k < vertices[i].out.size() ; k++ ) {
+                    if ( vertices[i].out[j].direction > vertices[i].out[k].direction ) {
+                        swap( vertices[i].out[j], vertices[i].out[k] ) ;
+                    }
+                }
+            }
+        }
+    }
+} ;
+
+class DFS {
+private :
+    struct DFS_Vertex {
+        string color ;
+        int discover_time ;
+        int finish_time ;
+        int predecessor ;
+    } ;
+
+    Graph graph ;
+    int time, graph_size ; // dfs time line
+    DFS_Vertex * DFS_VertexArr ; // vertex data for DFS, arrange by vector index
+    queue <int> DFS_Seq ;
+    
+    void DFS_Visit( int visit_idx ) {
+        queue <int> go_to ;
+        int curr_go_to ;
+
+        // discover this vertex
+        DFS_VertexArr[visit_idx].color = "gray" ;
+        DFS_VertexArr[visit_idx].discover_time = ++time ;
+        DFS_Seq.push( visit_idx ) ;
+
+        // get adjacent
+        graph.push_adjacent( visit_idx, go_to ) ;
+
+        // visit all
+        while( !go_to.empty() ) {
+            curr_go_to = go_to.front() ;
+            go_to.pop() ;
+
+            if ( DFS_VertexArr[curr_go_to].color == "white" ) {
+                DFS_VertexArr[curr_go_to].predecessor = visit_idx ;
+                DFS_Visit( curr_go_to ) ;
+            }
+        }
+
+        // finish this vertex
+        DFS_VertexArr[visit_idx].color = "black" ;
+        DFS_VertexArr[visit_idx].finish_time = ++time ;
+    }
+
+    void Print_DFS_Seq() {
+        bool end = false ;
+
+        while ( !DFS_Seq.empty() ) {
+            if ( end ) 
+                cout << graph.find_vertex( DFS_Seq.front() ) << endl << endl << endl ;
+                
+            else {
+                cout << graph.find_vertex( DFS_Seq.front() ) << " >> " ;
+                if ( DFS_Seq.size() == 2 ) end = true ;
+            }
+            
+            DFS_Seq.pop() ;
+        }
+    }
+
+
+public :
+    void do_DFS ( Graph circuit_graph ) {
+        // initial
+        time = 0 ;
+        graph = circuit_graph ;
+        graph_size = graph.size_of() ;
+        DFS_VertexArr = new DFS_Vertex[ graph_size ] ;
+
+        for ( int i = 0 ; i < graph_size ; i++ ) 
+            DFS_VertexArr[i].color = "white" ;
+
+
+        // call resursion to traverse verticescd
+        for ( int i = 0 ; i < graph_size ; i++ ) {
+            if ( DFS_VertexArr[i].color == "white" ) {
+                DFS_Visit( i ) ;
+            }
+        }
+
+        Print_DFS_Seq() ;
+        delete[] DFS_VertexArr ;
+    }
+} ;
