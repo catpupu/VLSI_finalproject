@@ -81,10 +81,14 @@ private:
         int predecessor ;
     } ;
 
+    Graph graph ;
+    int graph_size ;
+    Dijkstra_Vertex * Dijkstra_VertexArr ;
+
 public:
     void init ( Graph circuit_graph ) ;
-    int shortest ( int vertex_1, int vertex_2 ) ;
-    void print_allVertex_shortest ( int start ) ;
+    void do_Dijkstra ( int start_vertex ) ;
+    void print_all_shortest () ;
 } ;
 
 // ================== function =====================
@@ -373,5 +377,46 @@ public :
 
         Print_DFS_Seq() ;
         delete[] DFS_VertexArr ;
+    }
+} ;
+
+class Dijkstra {
+private:
+    struct Dijkstra_Vertex {
+        int distance ;
+        int predecessor ;
+    } ;
+
+    Graph graph ;
+    int graph_size ;
+    Dijkstra_Vertex * Dijkstra_VertexArr ;
+
+public:
+    void init ( Graph circuit_graph ) {
+        graph = circuit_graph ;
+        graph_size = graph.size_of() ;
+        Dijkstra_VertexArr = new Dijkstra_Vertex[graph_size] ;
+
+        for ( int i = 0 ; i < graph_size ; i++ ) {
+            Dijkstra_VertexArr[i].predecessor = -1 ;
+            Dijkstra_VertexArr[i].distance = INT32_MAX ;
+        }
+    }
+
+    void do_Dijkstra ( int start_vertex ) {
+        
+    }
+
+    void print_all_shortest () {
+        for ( int i = 0 ; i < graph_size ; i++ ) {
+            cout << "Vertex " << graph.find_vertex( i ) << " distance = " ;
+            cout << Dijkstra_VertexArr[i].distance << endl ;
+        }
+
+        cout << endl << endl ;
+    }
+
+    void clear() {
+        delete[] Dijkstra_VertexArr ;
     }
 } ;
