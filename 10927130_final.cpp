@@ -37,6 +37,7 @@ public:
     int find_vertex( string name ) ;
     string find_vertex( int index ) ;
     void push_adjacent ( int vertex_idx, queue <int> & adj ) ; // get adj. list
+    void push_adjacent_and_Weight ( int vertex_idx, queue <int> & adj ) ; // get adj. list with weight
 
     
     // for readfile() call add(or resort) new data
@@ -79,6 +80,7 @@ private:
     struct Dijkstra_Vertex {
         int distance ;
         int predecessor ;
+        bool popped ; // fake priority queue(min)
     } ;
 
     Graph graph ;
@@ -87,8 +89,10 @@ private:
 
 public:
     void init ( Graph circuit_graph ) ;
-    void do_Dijkstra ( int start_vertex ) ;
+    int fake_pop() ;
+    void do_Dijkstra ( Graph circuit_graph, int start_vertex ) ;
     void print_all_shortest () ;
+    void clear() ;
 } ;
 
 // ================== function =====================
@@ -97,6 +101,7 @@ int main() {
     int mode = -1 ;
     Graph circuit_graph ;
     DFS dfs ;
+    Dijkstra dij ;
 
     while( 1 ) {
         cout << "***     VLSI Final Project     **\n" ;
@@ -120,8 +125,9 @@ int main() {
 
                 case 2 :
                     cout << "Single source shortest path algorithm (Dijkstra)" << endl ;
-
-                    
+                    dij.do_Dijkstra(circuit_graph, 0) ; // start from first vertex(S)
+                    dij.print_all_shortest() ;
+                    dij.clear() ; // free memory
                     break ;
 
                 default :
@@ -252,6 +258,17 @@ public:
         }
     }
 
+    void push_adjacent_and_Weight ( int vertex_idx, queue <int> & adj ) {
+        string dir_vertex_name ;
+        int dir_vertex_weight ;
+
+        for ( int i = 0 ; i < vertices[ vertex_idx ].out.size() ; i++ ) {
+            dir_vertex_name = vertices[ vertex_idx ].out[i].direction ;
+            dir_vertex_weight = vertices[ vertex_idx ].out[i].weight ;
+            adj.push( find_vertex( dir_vertex_name ) ) ;
+            adj.push( dir_vertex_weight ) ;
+        }
+    }
 
     void append_vertex( string vertex_name ) {
         Instance push_in ;
@@ -357,7 +374,7 @@ private :
 
 
 public :
-    void do_DFS ( Graph circuit_graph ) {
+    void do_DFS( Graph circuit_graph ) {
         // initial
         time = 0 ;
         graph = circuit_graph ;
@@ -385,6 +402,7 @@ private:
     struct Dijkstra_Vertex {
         int distance ;
         int predecessor ;
+        bool popped ;
     } ;
 
     Graph graph ;
@@ -392,7 +410,7 @@ private:
     Dijkstra_Vertex * Dijkstra_VertexArr ;
 
 public:
-    void init ( Graph circuit_graph ) {
+    void init( Graph circuit_graph ) {
         graph = circuit_graph ;
         graph_size = graph.size_of() ;
         Dijkstra_VertexArr = new Dijkstra_Vertex[graph_size] ;
@@ -400,14 +418,53 @@ public:
         for ( int i = 0 ; i < graph_size ; i++ ) {
             Dijkstra_VertexArr[i].predecessor = -1 ;
             Dijkstra_VertexArr[i].distance = INT32_MAX ;
+            Dijkstra_VertexArr[i].popped = false ;
         }
     }
 
-    void do_Dijkstra ( int start_vertex ) {
-        
+    int fake_pop() {
+        int min = -1, min_dis = INT32_MAX ;
+
+        for ( int i = 0 ; i < graph_size ; i++ ) {
+            if ( !Dijkstra_VertexArr[i].popped && Dijkstra_VertexArr[i].distance < min_dis ) {
+                min = i ;
+                min_dis = Dijkstra_VertexArr[i].distance ;
+            }
+        }
+
+        if ( min != -1 ) Dijkstra_VertexArr[min].popped = true ;
+        return min ;
     }
 
-    void print_all_shortest () {
+    void do_Dijkstra( Graph circuit_graph, int start_vertex ) {
+        int min_dis_vertex, adj_vertex, adj_weight ;
+        queue <int> adj_list ;
+
+        init( circuit_graph ) ;
+        Dijkstra_VertexArr[start_vertex].distance = 0 ;
+        
+        while ( min_dis_vertex = fake_pop() ) {
+            if ( min_dis_vertex != -1 ) break ;
+
+            graph.push_adjacent_and_Weight( min_dis_vertex, adj_list ) ;
+
+            while( !adj_list.empty() ) {
+                adj_vertex = adj_list.front() ;
+                adj_list.pop() ;
+
+                adj_weight = adj_list.front() ;
+                adj_list.pop() ;
+
+                if ( Dijkstra_VertexArr[min_dis_vertex].distance + adj_weight 
+                < Dijkstra_VertexArr[adj_vertex].distance ) {
+                    Dijkstra_VertexArr[adj_vertex].predecessor = min_dis_vertex ;
+                    Dijkstra_VertexArr[adj_vertex].distance = Dijkstra_VertexArr[min_dis_vertex].distance + adj_weight ;
+                }
+            }
+        }
+    }
+
+    void print_all_shortest() {
         for ( int i = 0 ; i < graph_size ; i++ ) {
             cout << "Vertex " << graph.find_vertex( i ) << " distance = " ;
             cout << Dijkstra_VertexArr[i].distance << endl ;
