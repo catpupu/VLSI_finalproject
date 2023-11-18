@@ -1,5 +1,5 @@
 # VLSI設計自動化導論作業
-如果你喜歡這個專案[![star it](https://img.shields.io/github/stars/catpupu/VLSI_finalproject.svg?style=social)][star-url] on GitHub.
+如果你喜歡這個專案[![star it][star-img]][star-url] on GitHub.
 
 ## 輸入輸出格式
 
@@ -46,4 +46,6 @@ DFS, Dijkstra等graph algorithm所需的頂點資料以動態配置記憶體方�
 [output-img]: https://github.com/catpupu/VLSI_finalproject/blob/master/picture/output_img.png
 [vertex_structure-img]: https://github.com/catpupu/VLSI_finalproject/blob/master/picture/Instance(vertex)_structure.jpg
 [graph_algorithm_structure-img]: https://github.com/catpupu/VLSI_finalproject/blob/master/picture/graph_algorithm_structure.jpg
+
+[star-img]: https://img.shields.io/github/stars/catpupu/VLSI_finalproject.svg?style=social
 [star-url]: https://github.com/catpupu/VLSI_finalproject/stargazers
